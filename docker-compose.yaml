@@ -1,0 +1,48 @@
+name: "yii2-graph-generator"
+services:
+  app:
+    extends:
+      file: docker-compose.common.yaml
+      service: common_backend
+    healthcheck:
+      test: [ "CMD", "echo", "ok" ]
+      interval: 10s
+      timeout: 60s
+      retries: 30
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ./.docker/entrypoints/app.sh
+    command: php-fpm
+
+  caddy:
+    image: caddy:2.8.4-alpine
+    ports:
+      - "127.0.0.1:${DOCKER_PORT_BACKEND:?}:80"
+    volumes:
+      - ./:/var/www
+      - ./.docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.4.8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?}
+      MYSQL_DATABASE: ${DB_DATABASE:?}
+      MYSQL_USER: ${DB_USERNAME:?}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 30s
+      retries: 30
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./.docker/mysql:/etc/mysql/conf.d:ro
+
+volumes:
+  db_data:
+  caddy_data:

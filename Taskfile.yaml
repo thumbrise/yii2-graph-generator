@@ -1,0 +1,36 @@
+#$schema: https://taskfile.dev/schema.json
+version: '3.17'
+
+env:
+  DOCKER_HOST_UID:
+    sh: id -u
+  DOCKER_HOST_GID:
+    sh: id -g
+
+dotenv: [
+  '.env',
+]
+
+tasks:
+  c:
+    desc: docker compose и аргументы. Рабочий пример [task c -- up -d]. -- обязательно.
+    cmd: docker compose {{.CLI_ARGS}}
+
+  bash:
+    desc: Войти в терминал app.
+    cmd: task c -- exec app bash
+
+  up:
+    desc: Запустить приложение
+    cmds:
+      - task down
+
+      - task c -- up -d --build --remove-orphans
+
+      - docker image prune --force
+      - docker container prune --force
+
+  down:
+    desc: Остановить приложение и удалить контейнеры
+    cmds:
+      - task c -- down

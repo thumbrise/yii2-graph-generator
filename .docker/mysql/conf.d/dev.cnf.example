@@ -1,0 +1,34 @@
+[mysqld]
+# Кодировка по умолчанию (полная поддержка Unicode, включая эмодзи)
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# Настройки InnoDB (адаптируйте под доступную память)
+innodb_buffer_pool_size = 256M
+innodb_log_file_size = 64M
+innodb_flush_log_at_trx_commit = 2  # быстрее, но возможна потеря последней секунды при сбое (для разработки OK)
+innodb_flush_method = O_DIRECT
+
+# Соединения
+max_connections = 100
+connect_timeout = 5
+wait_timeout = 600
+max_allowed_packet = 16M
+
+# Логирование (отключите general_log, если не нужно)
+general_log = 0
+general_log_file = /var/lib/mysql/general.log
+slow_query_log = 1
+slow_query_log_file = /var/lib/mysql/slow.log
+long_query_time = 2
+log_queries_not_using_indexes = 1
+
+# Безопасность и производительность
+skip_name_resolve        # отключает обратное DNS-разрешение (ускоряет подключения)
+local_infile = 0         # запрещает загрузку локальных файлов
+
+[client]
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4
